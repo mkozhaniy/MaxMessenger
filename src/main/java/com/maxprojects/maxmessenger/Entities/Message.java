@@ -25,7 +25,7 @@ public class Message {
     @JoinColumn(name = "chat_id")
     private Chat chat_id;
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "sender_id")
     private User sender_id;
     @CreationTimestamp
     private LocalDateTime created;

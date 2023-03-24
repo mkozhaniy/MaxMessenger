@@ -19,13 +19,12 @@ public class Chat {
     @Id
     @GeneratedValue
     private Long id;
-    @OneToMany
-    @JoinColumn(name = "message_id")
+    @OneToMany(cascade = CascadeType.ALL)
     private List<Message> messages;
     @ManyToMany(mappedBy = "chats")
     private List<User> users;
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "admin_id")
     private User admin;
 
 }
