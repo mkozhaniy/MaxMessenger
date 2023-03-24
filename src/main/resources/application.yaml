@@ -1,1 +1,11 @@
-
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+  datasource:
+    url: jdbc:postgresql://localhost:5432/maxmessenger
+    username: "user"
+    password: "pass"
+  flyway:
+    baseline-on-migrate: true
