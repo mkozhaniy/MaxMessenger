@@ -1,5 +1,5 @@
 package com.maxprojects.maxmessenger.Entities;
 
 public enum Role {
-    LOGINED, NOTLOGINED, BOT
+    LOGINED, NOTLOGINED, BOT, ADMIN
 }
