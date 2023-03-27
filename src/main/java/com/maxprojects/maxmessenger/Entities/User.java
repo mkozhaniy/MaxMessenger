@@ -28,6 +28,6 @@ public class User {
     @JoinTable(name = "users_chats",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "chat_id"))
-    private List<Chat> chats;
+    private List<Chat> chatList;
 
 }
