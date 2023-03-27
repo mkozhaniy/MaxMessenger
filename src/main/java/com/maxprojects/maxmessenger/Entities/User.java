@@ -29,5 +29,5 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "chat_id"))
     private List<Chat> chatList;
-
+    private Role role;
 }
