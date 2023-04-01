@@ -1,6 +1,6 @@
 package com.maxprojects.maxmessenger.config;
 
-import com.maxprojects.maxmessenger.config.services.JwtService;
+import com.maxprojects.maxmessenger.services.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -52,7 +52,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 );
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
-            filterChain.doFilter(request, response);
         }
+        filterChain.doFilter(request, response);
     }
 }

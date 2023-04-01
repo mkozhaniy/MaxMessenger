@@ -1,4 +1,4 @@
-package com.maxprojects.maxmessenger.config.auth;
+package com.maxprojects.maxmessenger.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

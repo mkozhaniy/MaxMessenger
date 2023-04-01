@@ -1,4 +1,4 @@
-package com.maxprojects.maxmessenger.config.auth;
+package com.maxprojects.maxmessenger.auth;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
-public class AuthenticatonController {
+public class AuthenticationController {
 
     private final AuthenticationService service;
 

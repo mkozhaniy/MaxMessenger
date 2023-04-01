@@ -1,4 +1,4 @@
-package com.maxprojects.maxmessenger.config.services;
+package com.maxprojects.maxmessenger.services;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -18,6 +18,7 @@ import java.util.function.Function;
 public class JwtService {
 
     private static final String SECRET_KEY = "792F423F4528482B4D6251655468576D597133743677397A24432646294A404E";
+
     public String extractLogin(String token){
         return extractClaim(token, Claims::getSubject);
     }
@@ -40,7 +41,7 @@ public class JwtService {
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 60 * 60 * 24))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
