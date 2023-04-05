@@ -15,17 +15,21 @@ import java.util.List;
 @Builder
 @Table(name = "chats")
 public class Chat {
+    private static final String SEQ_NAME = "chat_seq";
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = SEQ_NAME)
+    @SequenceGenerator(name = SEQ_NAME, sequenceName = SEQ_NAME, allocationSize = 1)
     private Long id;
-    @OneToMany
-    @JoinColumn(name = "message_id")
+    @OneToMany(mappedBy = "chat")
     private List<Message> messages;
-    @ManyToMany(mappedBy = "chats")
+    @ManyToMany(mappedBy = "chatList")
     private List<User> users;
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "admin_id")
     private User admin;
+    @OneToOne
+    @JoinColumn(name = "message_id")
+    private Message lastMessage;
 
 }
