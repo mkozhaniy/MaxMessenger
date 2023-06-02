@@ -1,5 +1,6 @@
 package com.maxprojects.maxmessenger.Entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,8 +32,9 @@ public class User implements UserDetails {
     private String password;
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "users_chats",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "chat_id"))
+            joinColumns ={ @JoinColumn(name = "user_id")},
+            inverseJoinColumns = {@JoinColumn(name = "chat_id")})
+    @JsonIgnore
     private List<Chat> chatList;
     @Enumerated(EnumType.STRING)
     private Role role;

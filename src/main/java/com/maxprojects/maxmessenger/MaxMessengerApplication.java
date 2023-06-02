@@ -9,7 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class MaxMessengerApplication {
 
     public static void main(String[] args) {
-        ConfigurableApplicationContext context =SpringApplication.run(MaxMessengerApplication.class, args);
+        ConfigurableApplicationContext context = SpringApplication.run(MaxMessengerApplication.class, args);
     }
 
 }
