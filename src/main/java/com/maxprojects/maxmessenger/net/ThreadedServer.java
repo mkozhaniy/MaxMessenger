@@ -1,46 +1,64 @@
 package com.maxprojects.maxmessenger.net;
 
-import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
 
-public class ThreadedServer {
+@Component
+public class ThreadedServer implements InitializingBean, Runnable {
     private static final int PORT = 19000;
     private volatile boolean isRunning;
     static Logger log = LoggerFactory.getLogger(ThreadedServer.class);
     private ServerSocket sSocket;
     private Protocol protocol;
+    private HashMap<Long, ConnectionHandler> chatSockets = new HashMap<>();
 
-    public ThreadedServer(Protocol protocol){
+    public HashMap<Long, ConnectionHandler> getChatSockets() {
+        return chatSockets;
+    }
+
+    @Bean
+    @Scope("singleton")
+    public ThreadedServer threadedServer(){
+        return new ThreadedServer();
+    }
+
+    @Override
+    public void afterPropertiesSet(){
         try{
-            this.protocol = protocol;
+            this.protocol = new CustomProtocol();
             sSocket = new ServerSocket(PORT);
             sSocket.setReuseAddress(true);
+            Thread thread = new Thread(this);
+            thread.start();
         } catch (IOException e){
             e.printStackTrace();
         }
     }
 
-    @PostConstruct
-    public void init() throws Exception{
-        ThreadedServer ts = new ThreadedServer(new CustomProtocol());
-        ts.startServer();
-    }
-
-    private void startServer() throws Exception{
+    @Override
+    public void run(){
         log.info("Server started");
 
         isRunning = true;
         while(isRunning){
-            Socket socket = sSocket.accept();
-            log.info("Accepted " + socket.getInetAddress());
-            ConnectionHandler handler = new SocketConnectionHandler(protocol, socket);
-            Thread thread = new Thread(handler);
-            thread.start();
+            try {
+                Socket socket = sSocket.accept();
+                log.info("Accepted " + socket.getInetAddress());
+                ConnectionHandler handler = new SocketConnectionHandler(protocol, socket);
+                Thread thread = new Thread(handler);
+                thread.start();
+            } catch (Exception e){
+                e.printStackTrace();
+            }
         }
     }
 }

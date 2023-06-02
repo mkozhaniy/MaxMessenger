@@ -1,6 +1,5 @@
 package com.maxprojects.maxmessenger.net;
 
-import com.maxprojects.maxmessenger.Entities.Message;
 import com.maxprojects.maxmessenger.Entities.MessageDTO;
 
 import java.io.IOException;

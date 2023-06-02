@@ -5,8 +5,9 @@ import com.maxprojects.maxmessenger.Entities.Chat;
 import com.maxprojects.maxmessenger.Entities.Message;
 import com.maxprojects.maxmessenger.Entities.MessageDTO;
 import com.maxprojects.maxmessenger.Entities.User;
-import com.maxprojects.maxmessenger.net.Protocol;
+import com.maxprojects.maxmessenger.net.CustomProtocol;
 import com.maxprojects.maxmessenger.net.ThreadedClient;
+import com.maxprojects.maxmessenger.net.ThreadedServer;
 import com.maxprojects.maxmessenger.repository.ChatRepository;
 import com.maxprojects.maxmessenger.repository.MessageRepository;
 import com.maxprojects.maxmessenger.repository.UserRepository;
@@ -17,10 +18,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.sql.SQLException;
-import java.util.HashMap;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,32 +30,49 @@ public class ChatService {
     private final UserRepository userRepository;
     private final ChatRepository chatRepository;
     private final MessageRepository messageRepository;
-    private static Map<Long, ThreadedClient> chatHandlers= new HashMap<>();
     private final static Logger log = LoggerFactory.getLogger(ChatService.class);
     private final ApplicationContext context;
+    private final ThreadedServer threadedServer;
 
-    public Chat createChat(List<String> participants){
-        var chat =  Chat.builder()
-                .admin(userRepository
-                        .findByLogin(participants.get(0))
+
+    public Chat createChat(String admin, List<String> participants){
+        User adminUser = userRepository.findByLogin(admin)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        List<User> partUsers;
+        partUsers = participants.stream().map(login ->
+                userRepository
+                        .findByLogin(login)
                         .orElseThrow(() -> new UsernameNotFoundException("User not found")))
+                .collect(Collectors.toList());
+        partUsers.add(adminUser);
+
+        var chat =  Chat.builder()
+                .admin(adminUser)
                 .lastMessage(null)
-                .users(userRepository.
-                        findByLogins(participants.subList(1, participants.size())))
+                .users(partUsers)
                 .build();
+
+        partUsers.forEach(user -> user.getChatList().add(chat));
         chatRepository.save(chat);
-        chatHandlers.put(chat.getId(),
-                new ThreadedClient((Protocol) context.getBean("protocol"), context));
+        new ThreadedClient(new CustomProtocol(), context);
         return chat;
     }
 
-    public boolean sendToChat(Message message, Chat chat){
-        return chatHandlers.get(chat.getId()).send(MessageDTO.builder()
-                        .chat(chat.getId())
-                        .created(message.getCreated())
-                        .sender(message.getSender().getId())
-                        .text(message.getText())
-                .build());
+    public void sendToChat(Long chatId,String login,String text) {
+        try {
+            threadedServer.getChatSockets()
+                    .get(chatId)
+                    .send(MessageDTO.builder()
+                            .text(text)
+                            .chat(chatId)
+                            .sender(userRepository.findByLogin(login)
+                                    .orElseThrow(() -> new UsernameNotFoundException("not found user"))
+                                    .getId())
+                            .created(LocalDateTime.now())
+                            .build());
+        } catch (IOException e){
+            log.info(e.getMessage());
+        }
     }
 
     public void onMessage(MessageDTO messageDTO){
@@ -62,6 +81,7 @@ public class ChatService {
                     .orElseThrow(() -> new SQLException("not found chat"));
             User user = userRepository.findById(messageDTO.getSender())
                     .orElseThrow(() -> new SQLException("not found user"));
+
             Message message = Message.builder()
                     .chat(chat)
                     .sender(user)
@@ -69,9 +89,7 @@ public class ChatService {
                     .text(messageDTO.getText())
                     .build();
             chat.setLastMessage(message);
-            chatRepository.save(chat);
             messageRepository.save(message);
-
         } catch (SQLException e){
             log.info(e.getMessage());
         }
